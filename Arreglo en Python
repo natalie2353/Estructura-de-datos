@@ -1,11 +1,5 @@
-nombres = ["Ana", "Luis", "Carlos", "María"]
+arreglo = [10, 20, 30, 40, 50]
 
-# Arreglo de flotantes
-precios = [10.5, 20.75, 99.99]
-
-# Arreglo de booleanos
-estados = [True, False, True]
-
-print("Nombres:", nombres)
-print("Precios:", precios)
-print("Estados:", estados)
+print("Arreglo completo:", arreglo)
+print("Primer elemento:", arreglo[0])
+print("Último elemento:", arreglo[-1])
