@@ -1,0 +1,13 @@
+string[,] paises = {
+    { "México", "CDMX" },
+    { "España", "Madrid" },
+    { "Japón", "Tokio" }
+    { "Argentina", "Buenos Aires" }
+    { "Bélgica", "Bruselas"}
+    { "corea del sur", "seúl"}
+    { "china", "pekín"}
+};
+
+for (int i = 0; i < paises.GetLength(0); i++) {
+    Console.WriteLine("País: " + paises[i,0] + " - Capital: " + paises[i,1]);
+}
