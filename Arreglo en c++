@@ -1,0 +1,25 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    // Arreglo de strings
+    string nombres[] = {"Ana", "Luis", "Carlos", "María"};
+    int n1 = sizeof(nombres) / sizeof(nombres[0]);
+
+    // Arreglo de flotantes
+    float precios[] = {10.5, 20.75, 99.99};
+    int n2 = sizeof(precios) / sizeof(precios[0]);
+
+    // Arreglo de booleanos
+    bool estados[] = {true, false, true};
+    int n3 = sizeof(estados) / sizeof(estados[0]);
+
+    cout << "Nombres: ";
+    for(int i = 0; i < n1; i++) cout << nombres[i] << " ";
+    cout << "\nPrecios: ";
+    for(int i = 0; i < n2; i++) cout << precios[i] << " ";
+    cout << "\nEstados: ";
+    for(int i = 0; i < n3; i++) cout << estados[i] << " ";
+    return 0;
+}
