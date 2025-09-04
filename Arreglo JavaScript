@@ -1,0 +1,10 @@
+let dias = new Array(7);
+dias[0] = "Lunes";
+dias[1] = "Martes";
+dias[2] = "Miércoles";
+dias[3] = "Jueves";
+dias[4] = "Viernes";
+dias[5] = "Sábado";
+dias[6] = "Domingo";
+
+console.log(dias);
