@@ -1,0 +1,11 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    float precios[] = {10.5, 20.75, 99.99, 150.0};
+    int n = sizeof(precios) / sizeof(precios[0]);
+
+    for(int i = 0; i < n; i++)
+        cout << precios[i] << " ";
+    return 0;
+}

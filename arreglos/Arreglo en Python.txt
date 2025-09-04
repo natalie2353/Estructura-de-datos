@@ -1,0 +1,5 @@
+arreglo = [10, 20, 30, 40, 50]
+
+print("Arreglo completo:", arreglo)
+print("Primer elemento:", arreglo[0])
+print("Último elemento:", arreglo[-1])
