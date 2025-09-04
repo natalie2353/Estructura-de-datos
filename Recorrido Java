@@ -1,0 +1,8 @@
+public class Main {
+    public static void main(String[] args) {
+        String[] planetas = {"Mercurio", "Venus", "Tierra", "Marte", "Júpiter", "Saturno", "Urano", "Neptuno"};
+        for(String planeta : planetas) {
+            System.out.println(planeta);
+        }
+    }
+}
