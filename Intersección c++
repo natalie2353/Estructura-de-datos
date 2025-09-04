@@ -1,0 +1,21 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    vector<string> grupo1 = {"Delfín", "Tiburón", "Ballena", "Pulpo"};
+    vector<string> grupo2 = {"Pulpo", "Medusa", "Tiburón", "Estrella de mar"};
+    vector<string> interseccion;
+
+    for(string a : grupo1){
+        for(string b : grupo2){
+            if(a == b){
+                interseccion.push_back(a);
+                break;
+            }
+        }
+    }
+
+    for(string a : interseccion)
+        cout << a << " ";
+}
