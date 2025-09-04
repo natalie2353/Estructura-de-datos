@@ -1,0 +1,5 @@
+grupo1 = ["Delfín", "Tiburón", "Ballena", "Pulpo"]
+grupo2 = ["Pulpo", "Medusa", "Tiburón", "Estrella de mar"]
+
+interseccion = [a for a in grupo1 if a in grupo2]
+print(interseccion)
