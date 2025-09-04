@@ -1,5 +1,14 @@
-.let grupo1 = ["Delfín", "Tiburón", "Ballena", "Pulpo"];
-let grupo2 = ["Pulpo", "Medusa", "Tiburón", "Estrella de mar"];
+using System;
+using System.Linq;
 
-let interseccion = grupo1.filter(a => grupo2.includes(a));
-console.log(interseccion);
+class Program {
+    static void Main() {
+        string[] grupo1 = {"Delfín", "Tiburón", "Ballena", "Pulpo"};
+        string[] grupo2 = {"Pulpo", "Medusa", "Tiburón", "Estrella de mar"};
+
+        var interseccion = grupo1.Intersect(grupo2);
+
+        foreach(var a in interseccion)
+            Console.WriteLine(a);
+    }
+}
