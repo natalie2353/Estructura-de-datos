@@ -1,0 +1,21 @@
+public class Main {
+    public static void main(String[] args) {
+        String[] grupo1 = {"Delfín", "Tiburón", "Ballena", "Pulpo"};
+        String[] grupo2 = {"Pulpo", "Medusa", "Tiburón", "Estrella de mar"};
+
+        System.out.print("[");
+        boolean primero = true;
+
+        for(int i = 0; i < grupo1.length; i++){
+            for(int j = 0; j < grupo2.length; j++){
+                if(grupo1[i].equals(grupo2[j])){
+                    if(!primero) System.out.print(", ");
+                    System.out.print(grupo1[i]);
+                    primero = false;
+                    break;
+                }
+            }
+        }
+        System.out.println("]");
+    }
+}

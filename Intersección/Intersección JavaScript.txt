@@ -1,0 +1,5 @@
+.let grupo1 = ["Delfín", "Tiburón", "Ballena", "Pulpo"];
+let grupo2 = ["Pulpo", "Medusa", "Tiburón", "Estrella de mar"];
+
+let interseccion = grupo1.filter(a => grupo2.includes(a));
+console.log(interseccion);
