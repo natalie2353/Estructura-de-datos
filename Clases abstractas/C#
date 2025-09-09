@@ -1,0 +1,34 @@
+using System;
+
+abstract class Figura {
+    public abstract double Area();
+}
+
+class Circulo : Figura {
+    double radio;
+    public Circulo(double r) {
+        radio = r;
+    }
+    public override double Area() {
+        return Math.PI * radio * radio;
+    }
+}
+
+class Rectangulo : Figura {
+    double ancho, alto;
+    public Rectangulo(double a, double h) {
+        ancho = a; alto = h;
+    }
+    public override double Area() {
+        return ancho * alto;
+    }
+}
+
+class Program {
+    static void Main() {
+        Figura[] figuras = { new Circulo(5), new Rectangulo(4, 6) };
+        foreach (var f in figuras) {
+            Console.WriteLine("Área: " + f.Area());
+        }
+    }
+}
