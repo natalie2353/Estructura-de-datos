@@ -1,0 +1,10 @@
+lenguajes = ["Python", "Java", "C++", "JavaScript", "C#"]
+buscado = "JavaScript"
+
+indice = -1
+for i in range(len(lenguajes)):
+    if lenguajes[i] == buscado:
+        indice = i
+        break
+
+print(indice if indice != -1 else "No existe")
