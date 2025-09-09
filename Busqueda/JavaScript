@@ -1,0 +1,12 @@
+let lenguajes = ["Python", "Java", "C++", "JavaScript", "C#"];
+let buscado = "JavaScript";
+let indice = -1;
+
+for(let i = 0; i < lenguajes.length; i++){
+    if(lenguajes[i] === buscado){
+        indice = i;
+        break;
+    }
+}
+
+console.log(indice !== -1 ? indice : "No existe");
