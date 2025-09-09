@@ -1,0 +1,16 @@
+public class Main {
+    public static void main(String[] args) {
+        String[] lenguajes = {"Python", "Java", "C++", "JavaScript", "C#"};
+        String buscado = "JavaScript";
+        int indice = -1;
+
+        for(int i = 0; i < lenguajes.length; i++){
+            if(lenguajes[i].equals(buscado)){
+                indice = i;
+                break;
+            }
+        }
+
+        System.out.println(indice != -1 ? indice : "No existe");
+    }
+}
