@@ -1,0 +1,37 @@
+abstract class Figura {
+    abstract double area();
+}
+
+class Circulo extends Figura {
+    double radio;
+
+    Circulo(double radio) {
+        this.radio = radio;
+    }
+
+    double area() {
+        return Math.PI * radio * radio;
+    }
+}
+
+class Rectangulo extends Figura {
+    double ancho, alto;
+
+    Rectangulo(double ancho, double alto) {
+        this.ancho = ancho;
+        this.alto = alto;
+    }
+
+    double area() {
+        return ancho * alto;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Figura[] figuras = { new Circulo(5), new Rectangulo(4, 6) };
+        for (Figura f : figuras) {
+            System.out.println("Área: " + f.area());
+        }
+    }
+}
