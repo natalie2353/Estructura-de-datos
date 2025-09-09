@@ -1,0 +1,37 @@
+class Figura {
+    constructor() {
+        if (this.constructor === Figura) {
+            throw new Error("No se puede instanciar una clase abstracta");
+        }
+    }
+
+    area() {
+        throw new Error("Método abstracto, debes implementarlo");
+    }
+}
+
+class Circulo extends Figura {
+    constructor(radio) {
+        super();
+        this.radio = radio;
+    }
+
+    area() {
+        return Math.PI * this.radio ** 2;
+    }
+}
+
+class Rectangulo extends Figura {
+    constructor(ancho, alto) {
+        super();
+        this.ancho = ancho;
+        this.alto = alto;
+    }
+
+    area() {
+        return this.ancho * this.alto;
+    }
+}
+
+let figuras = [new Circulo(5), new Rectangulo(4, 6)];
+figuras.forEach(f => console.log("Área:", f.area()));
