@@ -1,0 +1,283 @@
+using System;
+
+class Program
+{
+    static char[,] tablero;
+    static Random rand = new Random();
+
+    static void Main()
+    {
+        int victoriasJugador1 = 0, victoriasJugador2 = 0, empates = 0;
+        string jugador1, jugador2 = "";
+        bool contraCPU = false;
+
+        Console.Write("Ingrese el nombre del jugador 1 (X): ");
+        jugador1 = LeerNombre();
+
+        string opcion;
+        do
+        {
+            Console.WriteLine("¿Quieres jugar contra otro jugador o contra la computadora?");
+            Console.WriteLine("1. Otro jugador");
+            Console.WriteLine("2. Computadora");
+            Console.Write("Elige una opción (1 o 2): ");
+            opcion = Console.ReadLine();
+
+            if (opcion != "1" && opcion != "2")
+                Console.WriteLine("Opción inválida. Debes escribir 1 o 2.");
+
+        } while (opcion != "1" && opcion != "2");
+
+        if (opcion == "2")
+        {
+            jugador2 = "Computadora";
+            contraCPU = true;
+        }
+        else
+        {
+            Console.Write("Ingrese el nombre del jugador 2 (O): ");
+            jugador2 = LeerNombre();
+        }
+
+        bool continuar = true;
+        while (continuar)
+        {
+            tablero = new char[3, 3];
+            InicializarTablero();
+
+            bool turnoJugador1 = true;
+            bool juegoTerminado = false;
+
+            while (!juegoTerminado)
+            {
+                ImprimirTablero();
+
+                if (turnoJugador1)
+                {
+                    Console.WriteLine($"{jugador1}, elige una casilla (1-9):");
+                    int casilla = LeerMovimiento();
+                    if (MarcarCasilla(casilla, 'X'))
+                    {
+                        if (HayGanador('X'))
+                        {
+                            ImprimirTablero();
+                            Console.WriteLine($"{jugador1} gana!");
+                            victoriasJugador1++;
+                            juegoTerminado = true;
+                        }
+                        else if (TableroLleno())
+                        {
+                            ImprimirTablero();
+                            Console.WriteLine("Empate!");
+                            empates++;
+                            juegoTerminado = true;
+                        }
+                        else turnoJugador1 = false;
+                    }
+                }
+                else
+                {
+                    if (contraCPU)
+                    {
+                        int casilla = MovimientoCPU();
+                        MarcarCasilla(casilla, 'O');
+                        Console.WriteLine($"Computadora eligió la casilla {casilla}");
+
+                        if (HayGanador('O'))
+                        {
+                            ImprimirTablero();
+                            Console.WriteLine("La computadora gana!");
+                            victoriasJugador2++;
+                            juegoTerminado = true;
+                        }
+                        else if (TableroLleno())
+                        {
+                            ImprimirTablero();
+                            Console.WriteLine("Empate!");
+                            empates++;
+                            juegoTerminado = true;
+                        }
+                        else turnoJugador1 = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{jugador2}, elige una casilla (1-9):");
+                        int casilla = LeerMovimiento();
+                        if (MarcarCasilla(casilla, 'O'))
+                        {
+                            if (HayGanador('O'))
+                            {
+                                ImprimirTablero();
+                                Console.WriteLine($"{jugador2} gana!");
+                                victoriasJugador2++;
+                                juegoTerminado = true;
+                            }
+                            else if (TableroLleno())
+                            {
+                                ImprimirTablero();
+                                Console.WriteLine("Empate!");
+                                empates++;
+                                juegoTerminado = true;
+                            }
+                            else turnoJugador1 = true;
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine($"Marcador: {jugador1} {victoriasJugador1} - {jugador2} {victoriasJugador2} | Empates: {empates}");
+            Console.Write("¿Quieren jugar otra vez? (s/n): ");
+            string respuesta = Console.ReadLine().ToLower();
+            if (respuesta != "s") continuar = false;
+        }
+    }
+
+    static string LeerNombre()
+    {
+        string nombre;
+        do
+        {
+            nombre = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(nombre))
+                Console.Write("El nombre no puede estar vacío, ingresa de nuevo: ");
+        } while (string.IsNullOrWhiteSpace(nombre));
+        return nombre;
+    }
+
+    static void InicializarTablero()
+    {
+        int num = 1;
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                tablero[i, j] = char.Parse(num++.ToString());
+    }
+
+    static void ImprimirTablero()
+    {
+        Console.Clear();
+        Console.WriteLine("-------------");
+        for (int i = 0; i < 3; i++)
+        {
+            Console.Write("| ");
+            for (int j = 0; j < 3; j++)
+            {
+                Console.Write(tablero[i, j] + " | ");
+            }
+            Console.WriteLine();
+            Console.WriteLine("-------------");
+        }
+    }
+
+    static int LeerMovimiento()
+    {
+        int casilla;
+        while (true)
+        {
+            if (int.TryParse(Console.ReadLine(), out casilla) && casilla >= 1 && casilla <= 9)
+            {
+                int fila = (casilla - 1) / 3;
+                int col = (casilla - 1) % 3;
+                if (tablero[fila, col] != 'X' && tablero[fila, col] != 'O')
+                    return casilla;
+                else
+                    Console.WriteLine("Esa casilla ya está ocupada. Intenta de nuevo:");
+            }
+            else
+                Console.WriteLine("Entrada inválida. Ingresa un número del 1 al 9:");
+        }
+    }
+
+    static bool MarcarCasilla(int casilla, char simbolo)
+    {
+        int fila = (casilla - 1) / 3;
+        int col = (casilla - 1) % 3;
+        if (tablero[fila, col] != 'X' && tablero[fila, col] != 'O')
+        {
+            tablero[fila, col] = simbolo;
+            return true;
+        }
+        return false;
+    }
+
+    static bool HayGanador(char simbolo)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (tablero[i, 0] == simbolo && tablero[i, 1] == simbolo && tablero[i, 2] == simbolo) return true;
+            if (tablero[0, i] == simbolo && tablero[1, i] == simbolo && tablero[2, i] == simbolo) return true;
+        }
+        if (tablero[0, 0] == simbolo && tablero[1, 1] == simbolo && tablero[2, 2] == simbolo) return true;
+        if (tablero[0, 2] == simbolo && tablero[1, 1] == simbolo && tablero[2, 0] == simbolo) return true;
+
+        return false;
+    }
+
+    static bool TableroLleno()
+    {
+        foreach (char c in tablero)
+            if (c != 'X' && c != 'O')
+                return false;
+        return true;
+    }
+
+    static int MovimientoCPU()
+    {
+        // 50% de probabilidad de jugar mal (aleatorio)
+        if (rand.Next(1, 101) <= 50)
+            return MovimientoAleatorio();
+
+        // Intentar ganar
+        int jugada = BuscarMovimientoGanador('O');
+        if (jugada != -1) return jugada;
+
+        // Bloquear al jugador
+        jugada = BuscarMovimientoGanador('X');
+        if (jugada != -1) return jugada;
+
+        // Tomar centro
+        if (tablero[1, 1] != 'X' && tablero[1, 1] != 'O') return 5;
+
+        // Tomar esquinas
+        int[] esquinas = { 1, 3, 7, 9 };
+        foreach (int esquina in esquinas)
+        {
+            int f = (esquina - 1) / 3;
+            int c = (esquina - 1) % 3;
+            if (tablero[f, c] != 'X' && tablero[f, c] != 'O')
+                return esquina;
+        }
+
+        // Movimiento aleatorio
+        return MovimientoAleatorio();
+    }
+
+    static int MovimientoAleatorio()
+    {
+        int casilla;
+        do
+        {
+            casilla = rand.Next(1, 10);
+            int fila = (casilla - 1) / 3;
+            int col = (casilla - 1) % 3;
+            if (tablero[fila, col] != 'X' && tablero[fila, col] != 'O')
+                return casilla;
+        } while (true);
+    }
+
+    static int BuscarMovimientoGanador(char simbolo)
+    {
+        for (int i = 1; i <= 9; i++)
+        {
+            int fila = (i - 1) / 3;
+            int col = (i - 1) % 3;
+            if (tablero[fila, col] != 'X' && tablero[fila, col] != 'O')
+            {
+                tablero[fila, col] = simbolo;
+                bool gana = HayGanador(simbolo);
+                tablero[fila, col] = char.Parse(i.ToString());
+                if (gana) return i;
+            }
+        }
+        return -1;
+    }
+}
