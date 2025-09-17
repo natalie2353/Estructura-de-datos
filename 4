@@ -1,0 +1,115 @@
+import java.util.*;
+
+public class Conecta4 {
+    private final int ROWS = 6, COLS = 7;
+    private final char[][] board = new char[ROWS][COLS];
+    private final Scanner scanner = new Scanner(System.in);
+    private final Random random = new Random();
+
+    private String playerName;
+    private String computerName = "Computadora";
+
+    public static void main(String[] args) {
+        Conecta4 game = new Conecta4();
+        game.menu();
+    }
+
+    private void menu() {
+        System.out.println("=== Bienvenido a Conecta 4 ===");
+        System.out.print("Ingresa tu nombre: ");
+        playerName = scanner.nextLine();
+        System.out.println("Hola " + playerName + ", jugarás contra " + computerName + ".");
+        play();
+    }
+
+    private void play() {
+        for (char[] row : board) Arrays.fill(row, ' ');
+        boolean playerTurn = true;
+        int moves = 0;
+        while (true) {
+            printBoard();
+            if (playerTurn) {
+                System.out.print(playerName + " (X), elige columna (1-7): ");
+                int col = scanner.nextInt() - 1;
+                if (!isValidColumn(col)) {
+                    System.out.println("Columna inválida, intenta otra vez.");
+                    continue;
+                }
+                dropPiece(col, 'X');
+                if (checkWin('X')) {
+                    printBoard();
+                    System.out.println(playerName + " gana!");
+                    break;
+                }
+            } else {
+                int col = computerMove('O');
+                if (checkWin('O')) {
+                    printBoard();
+                    System.out.println(computerName + " gana!");
+                    break;
+                }
+            }
+            moves++;
+            if (moves == ROWS * COLS) {
+                printBoard();
+                System.out.println("Empate!");
+                break;
+            }
+            playerTurn = !playerTurn;
+        }
+    }
+
+    private void printBoard() {
+        System.out.println();
+        for (char[] row : board) {
+            for (char cell : row) System.out.print("|" + cell);
+            System.out.println("|");
+        }
+        System.out.println(" 1 2 3 4 5 6 7 ");
+        System.out.println();
+    }
+
+    private boolean isValidColumn(int col) {
+        return col >= 0 && col < COLS && board[0][col] == ' ';
+    }
+
+    private void dropPiece(int col, char piece) {
+        for (int r = ROWS - 1; r >= 0; r--) {
+            if (board[r][col] == ' ') {
+                board[r][col] = piece;
+                break;
+            }
+        }
+    }
+
+    private int computerMove(char piece) {
+        List<Integer> valid = new ArrayList<>();
+        for (int c = 0; c < COLS; c++)
+            if (isValidColumn(c)) valid.add(c);
+        if (valid.isEmpty()) return -1;
+        int choice = valid.get(random.nextInt(valid.size()));
+        dropPiece(choice, piece);
+        System.out.println(computerName + " (O) juega columna " + (choice + 1));
+        return choice;
+    }
+
+    private boolean checkWin(char piece) {
+        for (int r = 0; r < ROWS; r++)
+            for (int c = 0; c < COLS - 3; c++)
+                if (board[r][c] == piece && board[r][c+1] == piece &&
+                    board[r][c+2] == piece && board[r][c+3] == piece) return true;
+        for (int c = 0; c < COLS; c++)
+            for (int r = 0; r < ROWS - 3; r++)
+                if (board[r][c] == piece && board[r+1][c] == piece &&
+                    board[r+2][c] == piece && board[r+3][c] == piece) return true;
+        for (int r = 0; r < ROWS - 3; r++)
+            for (int c = 0; c < COLS - 3; c++)
+                if (board[r][c] == piece && board[r+1][c+1] == piece &&
+                    board[r+2][c+2] == piece && board[r+3][c+3] == piece) return true;
+        for (int r = 3; r < ROWS; r++)
+            for (int c = 0; c < COLS - 3; c++)
+                if (board[r][c] == piece && board[r-1][c+1] == piece &&
+                    board[r-2][c+2] == piece && board[r-3][c+3] == piece) return true;
+        return false;
+    }
+}
