@@ -1,0 +1,205 @@
+import java.util.*;
+
+public class ConnectFour {
+    public static final int ROWS = 6;
+    public static final int COLS = 7;
+    public static final char EMPTY = '.';
+    public static final char PLAYER1 = 'X';
+    public static final char PLAYER2 = 'O';
+
+    private char[][] board;
+    private Scanner scanner;
+    private Random random;
+
+    public ConnectFour() {
+        board = new char[ROWS][COLS];
+        scanner = new Scanner(System.in);
+        random = new Random();
+        clearBoard();
+    }
+
+    private void clearBoard() {
+        for (int r = 0; r < ROWS; r++)
+            Arrays.fill(board[r], EMPTY);
+    }
+
+    private void printBoard() {
+        System.out.println();
+        for (int r = 0; r < ROWS; r++) {
+            for (int c = 0; c < COLS; c++) {
+                System.out.print(board[r][c] + " ");
+            }
+            System.out.println();
+        }
+        // print column numbers
+        for (int c = 0; c < COLS; c++) {
+            System.out.print(c + 1 + " ");
+        }
+        System.out.println("\n");
+    }
+
+    private boolean isValidColumn(int col) {
+        return col >= 0 && col < COLS && board[0][col] == EMPTY;
+    }
+
+    // drop piece in column, return row where placed or -1 if failed
+    private int dropPiece(int col, char piece) {
+        if (!isValidColumn(col)) return -1;
+        for (int r = ROWS - 1; r >= 0; r--) {
+            if (board[r][col] == EMPTY) {
+                board[r][col] = piece;
+                return r;
+            }
+        }
+        return -1;
+    }
+
+    private boolean boardFull() {
+        for (int c = 0; c < COLS; c++) {
+            if (board[0][c] == EMPTY) return false;
+        }
+        return true;
+    }
+
+    // Check 4-in-a-row for given piece
+    private boolean checkWin(char piece) {
+        // horizontal
+        for (int r = 0; r < ROWS; r++) {
+            for (int c = 0; c <= COLS - 4; c++) {
+                if (board[r][c] == piece && board[r][c+1] == piece && board[r][c+2] == piece && board[r][c+3] == piece)
+                    return true;
+            }
+        }
+        // vertical
+        for (int c = 0; c < COLS; c++) {
+            for (int r = 0; r <= ROWS - 4; r++) {
+                if (board[r][c] == piece && board[r+1][c] == piece && board[r+2][c] == piece && board[r+3][c] == piece)
+                    return true;
+            }
+        }
+        // diagonal down-right
+        for (int r = 0; r <= ROWS - 4; r++) {
+            for (int c = 0; c <= COLS - 4; c++) {
+                if (board[r][c] == piece && board[r+1][c+1] == piece && board[r+2][c+2] == piece && board[r+3][c+3] == piece)
+                    return true;
+            }
+        }
+        // diagonal up-right
+        for (int r = 3; r < ROWS; r++) {
+            for (int c = 0; c <= COLS - 4; c++) {
+                if (board[r][c] == piece && board[r-1][c+1] == piece && board[r-2][c+2] == piece && board[r-3][c+3] == piece)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private int playerMove(char piece) {
+        while (true) {
+            System.out.print("Jugador " + (piece == PLAYER1 ? "1 (X)" : "2 (O)") + " - Elige columna (1-" + COLS + "): ");
+            String line = scanner.nextLine().trim();
+            try {
+                int col = Integer.parseInt(line) - 1;
+                if (!isValidColumn(col)) {
+                    System.out.println("Columna inválida o llena. Intenta otra.");
+                    continue;
+                }
+                int row = dropPiece(col, piece);
+                return row != -1 ? col : -1;
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada no válida. Escribe un número (1-" + COLS + ").");
+            }
+        }
+    }
+
+    // Basic computer move: random valid column
+    private int computerMove(char piece) {
+        List<Integer> valid = new ArrayList<>();
+        for (int c = 0; c < COLS; c++) if (isValidColumn(c)) valid.add(c);
+        if (valid.isEmpty()) return -1;
+        int choice = valid.get(random.nextInt(valid.size()));
+        dropPiece(choice, piece);
+        System.out.println("Computadora (O) juega columna " + (choice + 1));
+        return choice;
+    }
+
+    private void playPvP() {
+        clearBoard();
+        printBoard();
+        char turn = PLAYER1;
+        while (true) {
+            int col = playerMove(turn);
+            printBoard();
+            if (checkWin(turn)) {
+                System.out.println("¡Gana el jugador " + (turn == PLAYER1 ? "1 (X)" : "2 (O)") + "!");
+                break;
+            }
+            if (boardFull()) {
+                System.out.println("Empate. ¡Tablero lleno!");
+                break;
+            }
+            turn = (turn == PLAYER1) ? PLAYER2 : PLAYER1;
+        }
+    }
+
+    private void playPvC() {
+        clearBoard();
+        printBoard();
+        char turn = PLAYER1; // player always X
+        while (true) {
+            if (turn == PLAYER1) {
+                playerMove(PLAYER1);
+            } else {
+                // simple AI
+                computerMove(PLAYER2);
+            }
+            printBoard();
+
+            if (checkWin(turn)) {
+                if (turn == PLAYER1) System.out.println("¡Gana el jugador (X)!");
+                else System.out.println("¡Gana la computadora (O)!");
+                break;
+            }
+            if (boardFull()) {
+                System.out.println("Empate. ¡Tablero lleno!");
+                break;
+            }
+            turn = (turn == PLAYER1) ? PLAYER2 : PLAYER1;
+        }
+    }
+
+    private void menu() {
+        while (true) {
+            System.out.println("=== CONECTA 4 ===");
+            System.out.println("1) Jugador vs Jugador");
+            System.out.println("2) Jugador vs Computadora");
+            System.out.println("3) Salir");
+            System.out.print("Elige opción: ");
+            String opt = scanner.nextLine().trim();
+            switch (opt) {
+                case "1":
+                    playPvP();
+                    break;
+                case "2":
+                    playPvC();
+                    break;
+                case "3":
+                    System.out.println("Gracias por jugar. ¡Adiós!");
+                    return;
+                default:
+                    System.out.println("Opción inválida. Intenta de nuevo.");
+            }
+            System.out.println("\n¿Jugar otra partida? (s/n)");
+            String again = scanner.nextLine().trim().toLowerCase();
+            if (!again.equals("s") && !again.equals("si")) {
+                System.out.println("Saliendo del juego. ¡Hasta luego!");
+                return;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        ConnectFour game = new ConnectFour();
+        game.menu();
+    }
+}
