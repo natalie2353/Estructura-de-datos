@@ -21,3 +21,159 @@ def print_board(board, hide_ships=True):
     for r in range(BOARD_SIZE):
         row = ""
         for c in range(BOARD_SIZE):
+            cell = board[r][c]
+            if hide_ships and cell == SHIP:
+                row += WATER + " "
+            else:
+                row += cell + " "
+        print(f"{LETTERS[r]}  {row}")
+    print()
+
+def coord_from_input(inp):
+    inp = inp.strip().upper().replace(" ", "")
+    if len(inp) < 2:
+        return None
+    letter, number = inp[0], inp[1:]
+    if letter not in LETTERS or not number.isdigit():
+        return None
+    row, col = LETTERS.index(letter), int(number) - 1
+    if 0 <= row < BOARD_SIZE and 0 <= col < BOARD_SIZE:
+        return (row, col)
+    return None
+
+def can_place(board, r, c, size, orientation):
+    if orientation == "H":
+        if c + size > BOARD_SIZE: return False
+        return all(board[r][cc] == WATER for cc in range(c, c+size))
+    else:
+        if r + size > BOARD_SIZE: return False
+        return all(board[rr][c] == WATER for rr in range(r, r+size))
+
+def place_ship(board, r, c, size, orientation):
+    coords = []
+    if orientation == "H":
+        for cc in range(c, c+size):
+            board[r][cc] = SHIP
+            coords.append((r, cc))
+    else:
+        for rr in range(r, r+size):
+            board[rr][c] = SHIP
+            coords.append((rr, c))
+    return coords
+
+def remove_ship(board, coords):
+    for r, c in coords:
+        board[r][c] = WATER
+
+def all_sunk(board):
+    return all(cell != SHIP for row in board for cell in row)
+
+def take_shot(board, r, c):
+    if board[r][c] == SHIP:
+        board[r][c] = HIT
+        return "Impacto!"
+    elif board[r][c] == WATER:
+        board[r][c] = MISS
+        return "Agua."
+    elif board[r][c] in (HIT, MISS):
+        return "Ya disparaste ahí."
+    return "Error."
+
+def place_all_ships(player_name):
+    board = create_board()
+    ships_positions = {}
+    print(f"\n=== {player_name}, coloca tus barcos ===")
+    print_board(board, hide_ships=False)
+    for name, size in SHIPS:
+        placed = False
+        while not placed:
+            pos = input(f"{name} (tamaño {size}) en (ejemplo A1): ")
+            coord = coord_from_input(pos)
+            if coord is None:
+                print("Coordenada inválida.")
+                continue
+            r, c = coord
+            orientation = input("Orientación (H/V): ").strip().upper()
+            if orientation not in ("H", "V"):
+                print("Orientación inválida.")
+                continue
+            if not can_place(board, r, c, size, orientation):
+                print("No se puede colocar ahí.")
+                continue
+            coords = place_ship(board, r, c, size, orientation)
+            ships_positions[name] = (size, coords)
+            print_board(board, hide_ships=False)
+            placed = True
+
+    while True:
+        move = input("¿Quieres mover un barco? (sí/no): ").strip().lower()
+        if move != "sí":
+            break
+        print("Barcos disponibles para mover:")
+        for i, (name, (size, coords)) in enumerate(ships_positions.items(), 1):
+            print(f"{i}. {name} (tamaño {size})")
+        choice = input("Elige un número de barco: ")
+        if not choice.isdigit() or int(choice) not in range(1, len(ships_positions)+1):
+            print("Opción inválida.")
+            continue
+        ship_name = list(ships_positions.keys())[int(choice)-1]
+        size, coords = ships_positions[ship_name]
+        remove_ship(board, coords)
+        print_board(board, hide_ships=False)
+        placed = False
+        while not placed:
+            pos = input(f"Nueva posición para {ship_name} (ejemplo A1): ")
+            coord = coord_from_input(pos)
+            if coord is None:
+                print("Coordenada inválida.")
+                continue
+            r, c = coord
+            orientation = input("Orientación (H/V): ").strip().upper()
+            if orientation not in ("H", "V"):
+                print("Orientación inválida.")
+                continue
+            if not can_place(board, r, c, size, orientation):
+                print("No se puede colocar ahí.")
+                continue
+            new_coords = place_ship(board, r, c, size, orientation)
+            ships_positions[ship_name] = (size, new_coords)
+            print_board(board, hide_ships=False)
+            placed = True
+
+    return board
+
+if __name__ == "__main__":
+    board1 = place_all_ships("Jugador 1")
+    input("Presiona ENTER y pasa la computadora al Jugador 2...")
+    board2 = place_all_ships("Jugador 2")
+
+    turn = 1
+    while True:
+        if turn == 1:
+            print("\n=== Turno de Jugador 1 ===")
+            print_board(board2, hide_ships=True)
+            pos = input("Disparo (ejemplo B4): ")
+            coord = coord_from_input(pos)
+            if coord is None: 
+                print("Coordenada inválida.")
+                continue
+            r, c = coord
+            print(take_shot(board2, r, c))
+            if all_sunk(board2):
+                print("¡Jugador 1 gana! Hundió todos los barcos.")
+                break
+            turn = 2
+        else:
+            print("\n=== Turno de Jugador 2 ===")
+            print_board(board1, hide_ships=True)
+            pos = input("Disparo (ejemplo C7): ")
+            coord = coord_from_input(pos)
+            if coord is None: 
+                print("Coordenada inválida.")
+                continue
+            r, c = coord
+            print(take_shot(board1, r, c))
+            if all_sunk(board1):
+                print("¡Jugador 2 gana! Hundió todos los barcos.")
+                break
+            turn = 1
