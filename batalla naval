@@ -1,0 +1,90 @@
+import string
+
+BOARD_SIZE = 10
+LETTERS = string.ascii_uppercase[:BOARD_SIZE]
+WATER = "~"
+SHIP = "O"
+
+SHIPS = [
+    ("Portaaviones", 5),
+    ("Acorazado", 4),
+    ("Crucero", 3),
+    ("Destructor", 2)
+]
+
+def create_board():
+    return [[WATER for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
+
+def print_board(board):
+    header = "   " + " ".join(f"{i:>2}" for i in range(1, BOARD_SIZE+1))
+    print(header)
+    for r in range(BOARD_SIZE):
+        row = " ".join(board[r])
+        print(f"{LETTERS[r]}  {row}")
+    print()
+
+def coord_from_input(inp):
+    inp = inp.strip().upper().replace(" ", "")
+    if len(inp) < 2:
+        return None
+    letter = inp[0]
+    number_part = inp[1:]
+    if letter not in LETTERS or not number_part.isdigit():
+        return None
+    col = int(number_part) - 1
+    row = LETTERS.index(letter)
+    if 0 <= row < BOARD_SIZE and 0 <= col < BOARD_SIZE:
+        return (row, col)
+    return None
+
+def can_place(board, r, c, size, orientation):
+    if orientation == "H":
+        if c + size > BOARD_SIZE:
+            return False
+        for cc in range(c, c+size):
+            if board[r][cc] != WATER:
+                return False
+    else:
+        if r + size > BOARD_SIZE:
+            return False
+        for rr in range(r, r+size):
+            if board[rr][c] != WATER:
+                return False
+    return True
+
+def place_ship(board, r, c, size, orientation):
+    if orientation == "H":
+        for cc in range(c, c+size):
+            board[r][cc] = SHIP
+    else:
+        for rr in range(r, r+size):
+            board[rr][c] = SHIP
+
+if __name__ == "__main__":
+    board = create_board()
+    print("=== Colocación de barcos (4 barcos) ===")
+    print_board(board)
+
+    for name, size in SHIPS:
+        placed = False
+        while not placed:
+            print(f"Coloca {name} (tamaño {size})")
+            pos = input("Posición inicial (ejemplo A1): ")
+            coord = coord_from_input(pos)
+            if coord is None:
+                print("Coordenada inválida.")
+                continue
+            r, c = coord
+            orientation = input("Orientación (H=horizontal, V=vertical): ").strip().upper()
+            if orientation not in ("H", "V"):
+                print("Orientación inválida.")
+                continue
+            if not can_place(board, r, c, size, orientation):
+                print("No se puede colocar ahí.")
+                continue
+            place_ship(board, r, c, size, orientation)
+            print_board(board)
+            placed = True
+
+    print("¡Barcos colocados!")
+    print_board(board)
