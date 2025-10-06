@@ -1,0 +1,335 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+/*
+  Batalla Naval - versión consola para 2 jugadores (local)
+  Autor: Generado por ChatGPT (adaptar y usar libremente)
+  Compilar: g++ -std=c++17 batalla_naval.cpp -o batalla_naval
+*/
+
+const int N = 10;
+
+enum Cell { EMPTY, SHIP, HIT, MISS };
+struct Ship {
+    string name;
+    int size;
+    vector<pair<int,int>> coords;
+    bool sunk() const {
+        for (auto &c : coords) {
+            // if any coordinate is not recorded as hit (we'll check via board), sinking check done elsewhere
+        }
+        return false;
+    }
+};
+
+struct Player {
+    vector<vector<Cell>> board; // own board: EMPTY or SHIP or HIT or MISS
+    vector<vector<Cell>> radar; // what player knows of opponent: EMPTY, HIT, MISS
+    vector<Ship> ships;
+    string name;
+    Player() {
+        board.assign(N, vector<Cell>(N, EMPTY));
+        radar.assign(N, vector<Cell>(N, EMPTY));
+    }
+};
+
+void clearScreen() {
+#if defined(_WIN32) || defined(_WIN64)
+    system("cls");
+#else
+    cout << "\x1B[2J\x1B[H";
+#endif
+}
+
+void pauseEnter() {
+    cout << "Presiona Enter para continuar...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
+void printBoard(const vector<vector<Cell>>& b, bool showShips) {
+    cout << "   ";
+    for (int j = 0; j < N; ++j) {
+        cout << char('A' + j) << ' ';
+    }
+    cout << '\n';
+    for (int i = 0; i < N; ++i) {
+        cout << setw(2) << i+1 << ' ';
+        for (int j = 0; j < N; ++j) {
+            char ch = '.';
+            if (b[i][j] == EMPTY) ch = '.';
+            else if (b[i][j] == SHIP) ch = (showShips ? 'S' : '.');
+            else if (b[i][j] == HIT) ch = 'X';
+            else if (b[i][j] == MISS) ch = 'o';
+            cout << ch << ' ';
+        }
+        cout << '\n';
+    }
+}
+
+bool inside(int r, int c) {
+    return r >= 0 && r < N && c >= 0 && c < N;
+}
+
+bool canPlace(const vector<vector<Cell>>& board, int r, int c, int len, bool horiz) {
+    for (int k = 0; k < len; ++k) {
+        int rr = r + (horiz ? 0 : k);
+        int cc = c + (horiz ? k : 0);
+        if (!inside(rr, cc)) return false;
+        if (board[rr][cc] != EMPTY) return false;
+    }
+    return true;
+}
+
+void placeShipOnBoard(vector<vector<Cell>>& board, Ship &ship, int r, int c, bool horiz) {
+    ship.coords.clear();
+    for (int k = 0; k < ship.size; ++k) {
+        int rr = r + (horiz ? 0 : k);
+        int cc = c + (horiz ? k : 0);
+        board[rr][cc] = SHIP;
+        ship.coords.push_back({rr, cc});
+    }
+}
+
+void randomPlaceAll(Player &p) {
+    vector<pair<string,int>> list = {
+        {"Portaaviones", 5},
+        {"Acorazado", 4},
+        {"Crucero", 3},
+        {"Submarino", 3},
+        {"Destructor", 2}
+    };
+    random_device rd;
+    mt19937 rng(rd());
+    uniform_int_distribution<int> distDir(0,1);
+    uniform_int_distribution<int> distPos(0, N-1);
+    p.ships.clear();
+    for (auto &pr : list) {
+        Ship s;
+        s.name = pr.first;
+        s.size = pr.second;
+        bool placed = false;
+        int tries = 0;
+        while (!placed) {
+            bool horiz = distDir(rng) == 1;
+            int r = distPos(rng);
+            int c = distPos(rng);
+            // adjust start so fits: if horiz and c+len-1 >= N, pick c-len+1..c
+            if (horiz) {
+                if (c + s.size > N) c = N - s.size;
+            } else {
+                if (r + s.size > N) r = N - s.size;
+            }
+            if (canPlace(p.board, r, c, s.size, horiz)) {
+                placeShipOnBoard(p.board, s, r, c, horiz);
+                p.ships.push_back(s);
+                placed = true;
+            }
+            if (++tries > 2000) {
+                // fallback clear and restart to avoid infinite loops
+                for (int i=0;i<N;i++) for (int j=0;j<N;j++) p.board[i][j]=EMPTY;
+                p.ships.clear();
+                tries = 0;
+            }
+        }
+    }
+}
+
+pair<int,int> parseCoord(const string &s) {
+    // Accept formats like A1, A01, a10, J10, 1A, 10A
+    // We'll try to be flexible: extract letter for column, number for row
+    int r = -1, c = -1;
+    string letters, digits;
+    for (char ch : s) {
+        if (isalpha((unsigned char)ch)) letters.push_back(toupper(ch));
+        if (isdigit((unsigned char)ch)) digits.push_back(ch);
+    }
+    if (!letters.empty() && !digits.empty()) {
+        c = letters[0] - 'A';
+        r = stoi(digits) - 1;
+    } else {
+        // if only digits or only letters -> invalid
+    }
+    return {r,c};
+}
+
+void manualPlaceAll(Player &p) {
+    vector<pair<string,int>> list = {
+        {"Portaaviones", 5},
+        {"Acorazado", 4},
+        {"Crucero", 3},
+        {"Submarino", 3},
+        {"Destructor", 2}
+    };
+    p.ships.clear();
+    for (auto &pr : list) {
+        Ship s;
+        s.name = pr.first;
+        s.size = pr.second;
+        bool placed = false;
+        while (!placed) {
+            clearScreen();
+            cout << p.name << " - Coloca tu " << s.name << " (tam: " << s.size << ")\n";
+            printBoard(p.board, true);
+            cout << "Introduce coordenada de inicio (ej: A1): ";
+            string coord;
+            if(! (cin >> coord)) return;
+            auto [r,c] = parseCoord(coord);
+            if (!inside(r,c)) {
+                cout << "Coordenada inválida. Intenta de nuevo.\n";
+                pauseEnter();
+                continue;
+            }
+            cout << "Horizontal (H) o Vertical (V)? ";
+            char hv; cin >> hv;
+            bool horiz = (toupper(hv) == 'H');
+            if (horiz) {
+                if (c + s.size > N) {
+                    cout << "No cabe horizontalmente desde esa posición.\n";
+                    pauseEnter();
+                    continue;
+                }
+            } else {
+                if (r + s.size > N) {
+                    cout << "No cabe verticalmente desde esa posición.\n";
+                    pauseEnter();
+                    continue;
+                }
+            }
+            if (!canPlace(p.board, r, c, s.size, horiz)) {
+                cout << "Espacio ocupado. Intenta otro lugar.\n";
+                pauseEnter();
+                continue;
+            }
+            placeShipOnBoard(p.board, s, r, c, horiz);
+            p.ships.push_back(s);
+            placed = true;
+        }
+    }
+}
+
+bool allSunk(const Player &p) {
+    for (const Ship &s : p.ships) {
+        for (auto &coord : s.coords) {
+            int r = coord.first, c = coord.second;
+            if (p.board[r][c] == SHIP) return false;
+        }
+    }
+    return true;
+}
+
+bool processShot(Player &attacker, Player &defender, int r, int c) {
+    if (!inside(r,c)) {
+        cout << "Coordenada fuera de rango.\n";
+        return false;
+    }
+    if (attacker.radar[r][c] == HIT || attacker.radar[r][c] == MISS) {
+        cout << "Ya disparaste a esa coordenada.\n";
+        return false;
+    }
+    if (defender.board[r][c] == SHIP) {
+        cout << "¡Impacto!\n";
+        defender.board[r][c] = HIT;
+        attacker.radar[r][c] = HIT;
+        // check if a ship was sunk (by scanning defender.ships)
+        for (auto &s : defender.ships) {
+            bool contains = false;
+            for (auto &co : s.coords) if (co.first==r && co.second==c) contains = true;
+            if (contains) {
+                bool sunk = true;
+                for (auto &co : s.coords) {
+                    if (defender.board[co.first][co.second] != HIT) {
+                        sunk = false; break;
+                    }
+                }
+                if (sunk) {
+                    cout << "Hundiste el " << s.name << "!\n";
+                }
+                break;
+            }
+        }
+        return true;
+    } else {
+        cout << "Agua.\n";
+        defender.board[r][c] = MISS;
+        attacker.radar[r][c] = MISS;
+        return true;
+    }
+}
+
+pair<int,int> askShot(Player &p) {
+    while (true) {
+        cout << p.name << ", introduce coordenada para disparar (ej: B7): ";
+        string s; cin >> s;
+        auto [r,c] = parseCoord(s);
+        if (inside(r,c)) return {r,c};
+        cout << "Coordenada inválida. Intenta de nuevo.\n";
+    }
+}
+
+void showStatus(Player &p) {
+    cout << p.name << " - Tu tablero:\n";
+    printBoard(p.board, true);
+    cout << "\nRadar (lo que sabes del oponente):\n";
+    printBoard(p.radar, false);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    Player p1, p2;
+    cout << "Batalla Naval - Juego en consola (2 jugadores)\n";
+    cout << "Nombre del Jugador 1: ";
+    getline(cin, p1.name);
+    if (p1.name.empty()) p1.name = "Jugador 1";
+    cout << "Nombre del Jugador 2: ";
+    getline(cin, p2.name);
+    if (p2.name.empty()) p2.name = "Jugador 2";
+
+    cout << "Colocación automática de barcos? (S/n): ";
+    string resp; getline(cin, resp);
+    bool autoPlace = true;
+    if (!resp.empty() && (resp[0]=='n' || resp[0]=='N')) autoPlace = false;
+
+    if (autoPlace) {
+        randomPlaceAll(p1);
+        randomPlaceAll(p2);
+    } else {
+        cout << "\n--- " << p1.name << " coloca barcos ---\n";
+        manualPlaceAll(p1);
+        clearScreen();
+        cout << "\n--- " << p2.name << " coloca barcos ---\n";
+        manualPlaceAll(p2);
+    }
+
+    Player *cur = &p1;
+    Player *other = &p2;
+    while (true) {
+        clearScreen();
+        cout << "Turno de " << cur->name << "\n\n";
+        showStatus(*cur);
+        cout << '\n';
+        // ask shot
+        auto [r,c] = askShot(*cur);
+        // process
+        bool validShot = processShot(*cur, *other, r, c);
+        if (!validShot) {
+            pauseEnter();
+            continue;
+        }
+        // check win
+        if (allSunk(*other)) {
+            cout << "\n¡" << cur->name << " gana! Todos los barcos del oponente fueron hundidos.\n";
+            cout << cur->name << " - Tablero final del oponente:\n";
+            printBoard(other->board, true);
+            break;
+        }
+        cout << "\nFin del turno. Cambiar de jugador.\n";
+        pauseEnter();
+        // swap players
+        swap(cur, other);
+    }
+
+    cout << "Gracias por jugar.\n";
+    return 0;
+}
