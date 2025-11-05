@@ -1,0 +1,261 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <ctime>
+#include <chrono>
+#include <fstream>
+#include <iomanip>
+#include <thread>   // Para sleep_for
+#include <cstdlib>  // Para system("cls")
+using namespace std;
+using namespace std::chrono;
+
+struct Usuario {
+    string nombre;
+    int vidas;
+};
+
+// ---- PROTOTIPOS ----
+void mostrarMenu(Usuario &jug);
+void jugarNivel(Usuario &jug, vector<vector<vector<int>>> niveles, string etiqueta);
+void jugarSudoku(Usuario &jug, vector<vector<int>> tablero, string etiqueta);
+void mostrarTablero(const vector<vector<int>>& tablero, int vidas, double tiempo);
+bool movimientoValido(vector<vector<int>>& tablero, int fila, int col, int num);
+bool tableroCompleto(vector<vector<int>>& tablero);
+void guardarRanking(string nombre, string nivel, double tiempo);
+void mostrarRanking();
+
+// ---- TABLEROS ----
+vector<vector<vector<int>>> niveles1 = {
+    { // Muy fácil
+        {5,3,0,0,7,0,0,0,0},
+        {6,0,0,1,9,5,0,0,0},
+        {0,9,8,0,0,0,0,6,0},
+        {8,0,0,0,6,0,0,0,3},
+        {4,0,0,8,0,3,0,0,1},
+        {7,0,0,0,2,0,0,0,6},
+        {0,6,0,0,0,0,2,8,0},
+        {0,0,0,4,1,9,0,0,5},
+        {0,0,0,0,8,0,0,7,9}
+    },
+    { // Fácil
+        {0,2,0,6,0,8,0,0,0},
+        {5,8,0,0,0,9,7,0,0},
+        {0,0,0,0,4,0,0,0,0},
+        {3,7,0,0,0,0,5,0,0},
+        {6,0,0,0,0,0,0,0,4},
+        {0,0,8,0,0,0,0,1,3},
+        {0,0,0,0,2,0,0,0,0},
+        {0,0,9,8,0,0,0,3,6},
+        {0,0,0,3,0,6,0,9,0}
+    },
+    { // Media
+        {0,0,0,0,0,0,9,0,7},
+        {0,0,0,4,2,0,1,0,0},
+        {0,0,6,0,0,0,0,0,0},
+        {0,0,2,0,3,0,0,0,0},
+        {8,0,0,0,0,0,0,0,2},
+        {0,0,0,0,4,0,3,0,0},
+        {0,0,0,0,0,0,6,0,0},
+        {0,0,3,0,9,7,0,0,0},
+        {5,0,7,0,0,0,0,0,0}
+    },
+    { // Difícil
+        {0,0,0,6,0,0,4,0,0},
+        {7,0,0,0,0,3,6,0,0},
+        {0,0,0,0,9,1,0,8,0},
+        {0,0,0,0,0,0,0,0,0},
+        {0,5,0,1,8,0,0,0,3},
+        {0,0,0,3,0,6,0,4,5},
+        {0,4,0,2,0,0,0,6,0},
+        {9,0,3,0,0,0,0,0,0},
+        {0,2,0,0,0,0,1,0,0}
+    },
+    { // Muy difícil
+        {0,0,0,0,0,0,0,0,1},
+        {0,0,0,0,0,0,0,0,0},
+        {3,0,0,0,0,0,0,0,0},
+        {0,1,0,0,0,0,0,0,0},
+        {0,0,0,0,2,0,0,0,0},
+        {0,0,0,0,0,0,0,3,0},
+        {0,0,0,0,0,0,0,0,6},
+        {0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0}
+    }
+};
+
+vector<vector<vector<int>>> niveles2 = niveles1;
+vector<vector<vector<int>>> niveles3 = niveles1;
+
+// ---- MAIN ----
+int main() {
+    Usuario jugador;
+    cout << "=== SUDOKU CONSOLE ===\n";
+    cout << "Ingresa tu nombre: ";
+    cin >> jugador.nombre;
+    jugador.vidas = 3;
+    mostrarMenu(jugador);
+    return 0;
+}
+
+// ---- MENU ----
+void mostrarMenu(Usuario &jug) {
+    int opcion, nivel;
+    do {
+        system("cls");
+        cout << "\n1. Jugar\n2. Ver ranking\n3. Salir\n";
+        cout << "Selecciona: ";
+        cin >> opcion;
+
+        if (opcion == 1) {
+            cout << "\nSelecciona el nivel principal (1–3): ";
+            cin >> nivel;
+            if (nivel == 1) jugarNivel(jug, niveles1, "Nivel 1");
+            else if (nivel == 2) jugarNivel(jug, niveles2, "Nivel 2");
+            else if (nivel == 3) jugarNivel(jug, niveles3, "Nivel 3");
+            else cout << "Nivel invalido.\n";
+        } 
+        else if (opcion == 2) {
+            mostrarRanking();
+        } 
+        else if (opcion == 3) {
+            cout << "Saliendo...\n";
+        } 
+        else {
+            cout << "Opcion invalida.\n";
+        }
+    } while (opcion != 3);
+}
+
+// ---- FUNCIONES ----
+void mostrarTablero(const vector<vector<int>>& t, int vidas, double tiempo) {
+    int minutos = (int)(tiempo / 60);
+    int segundos = (int)tiempo % 60;
+
+    cout << "\nVidas: " << vidas << "   Tiempo: ";
+    cout << setfill('0') << setw(2) << minutos << ":" << setw(2) << segundos << "\n\n";
+
+    for (int i = 0; i < 9; i++) {
+        if (i % 3 == 0 && i != 0) cout << "------+-------+------\n";
+        for (int j = 0; j < 9; j++) {
+            if (j % 3 == 0 && j != 0) cout << "| ";
+            cout << (t[i][j] ? to_string(t[i][j]) : ".") << " ";
+        }
+        cout << "\n";
+    }
+}
+
+bool movimientoValido(vector<vector<int>>& t, int f, int c, int n) {
+    for (int x = 0; x < 9; x++)
+        if (t[f][x] == n || t[x][c] == n)
+            return false;
+
+    int sr = f - f % 3, sc = c - c % 3;
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            if (t[sr + i][sc + j] == n)
+                return false;
+
+    return true;
+}
+
+bool tableroCompleto(vector<vector<int>>& t) {
+    for (auto &fila : t)
+        for (int n : fila)
+            if (n == 0)
+                return false;
+    return true;
+}
+
+void guardarRanking(string nombre, string nivel, double tiempo) {
+    ofstream archivo("ranking.txt", ios::app);
+    if (archivo.is_open()) {
+        archivo << nombre << " | " << nivel << " | " 
+                << fixed << setprecision(2) << tiempo << " s\n";
+        archivo.close();
+    }
+}
+
+void mostrarRanking() {
+    ifstream archivo("ranking.txt");
+    if (!archivo.is_open()) {
+        cout << "No hay registros.\n";
+        return;
+    }
+    cout << "\n=== RANKING ===\n";
+    string linea;
+    while (getline(archivo, linea))
+        cout << linea << "\n";
+    archivo.close();
+    cout << "\nPresiona Enter para continuar...";
+    cin.ignore();
+    cin.get();
+}
+
+void jugarNivel(Usuario &jug, vector<vector<vector<int>>> niveles, string etiqueta) {
+    for (int i = 0; i < niveles.size() && jug.vidas > 0; i++) {
+        string dif;
+        switch (i) {
+            case 0: dif = "Muy facil"; break;
+            case 1: dif = "Facil"; break;
+            case 2: dif = "Media"; break;
+            case 3: dif = "Dificil"; break;
+            case 4: dif = "Muy dificil"; break;
+        }
+        jugarSudoku(jug, niveles[i], etiqueta + " - " + dif);
+    }
+
+    if (jug.vidas <= 0)
+        cout << "\nSin vidas. Fin del juego.\n";
+}
+
+void jugarSudoku(Usuario &jug, vector<vector<int>> t, string etiqueta) {
+    auto start = steady_clock::now();
+
+    while (!tableroCompleto(t) && jug.vidas > 0) {
+        auto now = steady_clock::now();
+        double tiempo = duration<double>(now - start).count();
+        system("cls");
+        cout << "\n=== " << etiqueta << " ===\n";
+        mostrarTablero(t, jug.vidas, tiempo);
+
+        int f, c, n;
+        cout << "\nFila (1-9): ";
+        cin >> f;
+        cout << "Columna (1-9): ";
+        cin >> c;
+        cout << "Numero (1-9): ";
+        cin >> n;
+
+        f--; c--;
+        if (f < 0 || f > 8 || c < 0 || c > 8 || n < 1 || n > 9) {
+            cout << "Fuera de rango.\n";
+            this_thread::sleep_for(chrono::seconds(1));
+            continue;
+        }
+        if (t[f][c] != 0) {
+            cout << "Celda ocupada.\n";
+            this_thread::sleep_for(chrono::seconds(1));
+            continue;
+        }
+        if (movimientoValido(t, f, c, n))
+            t[f][c] = n;
+        else {
+            cout << "Movimiento invalido. Pierdes una vida.\n";
+            jug.vidas--;
+            this_thread::sleep_for(chrono::seconds(1));
+        }
+    }
+
+    auto end = steady_clock::now();
+    double tiempo = duration<double>(end - start).count();
+
+    if (jug.vidas > 0) {
+        cout << "\nDificultad completada.\n";
+        cout << "Tiempo: " << fixed << setprecision(2) << tiempo << " segundos.\n";
+        guardarRanking(jug.nombre, etiqueta, tiempo);
+        cout << "\nPresiona Enter para continuar al siguiente nivel...";
+        cin.ignore();
+        cin.get();
+    }
+}
