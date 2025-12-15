@@ -1,0 +1,14 @@
+using System;
+using System.Collections.Generic;
+
+class Program {
+    static void Main() {
+        PriorityQueue<int, int> pq = new PriorityQueue<int, int>();
+        pq.Enqueue(3, 3);
+        pq.Enqueue(1, 1);
+        pq.Enqueue(2, 2);
+
+        while (pq.Count > 0)
+            Console.Write(pq.Dequeue() + " ");
+    }
+}
