@@ -1,3 +1,5 @@
+using System;
+
 class Cola {
     int[] arr = new int[5];
     int front = -1, rear = -1;
@@ -11,5 +13,23 @@ class Cola {
     public void Dequeue() {
         if (front == -1 || front > rear) return;
         front++;
+    }
+
+    public void Mostrar() {
+        for (int i = front; i <= rear; i++)
+            Console.Write(arr[i] + " ");
+        Console.WriteLine();
+    }
+}
+
+class Program {
+    static void Main() {
+        Cola c = new Cola();
+        c.Enqueue(1);
+        c.Enqueue(2);
+        c.Enqueue(3);
+        c.Mostrar();
+        c.Dequeue();
+        c.Mostrar();
     }
 }
