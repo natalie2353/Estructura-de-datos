@@ -12,4 +12,22 @@ class Cola {
         if (front == -1 || front > rear) return;
         front++;
     }
+
+    void mostrar() {
+        for (int i = front; i <= rear; i++)
+            System.out.print(arr[i] + " ");
+        System.out.println();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Cola c = new Cola();
+        c.enqueue(10);
+        c.enqueue(20);
+        c.enqueue(30);
+        c.mostrar();
+        c.dequeue();
+        c.mostrar();
+    }
 }
