@@ -1,0 +1,11 @@
+class ColaCircular {
+    int[] arr = new int[5];
+    int front = -1, rear = -1;
+
+    void enqueue(int x) {
+        if ((rear + 1) % 5 == front) return;
+        if (front == -1) front = 0;
+        rear = (rear + 1) % 5;
+        arr[rear] = x;
+    }
+}
