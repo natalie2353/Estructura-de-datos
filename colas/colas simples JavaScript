@@ -1,7 +1,14 @@
 class Cola {
-    constructor() {
-        this.items = [];
-    }
-    enqueue(x) { this.items.push(x); }
-    dequeue() { this.items.shift(); }
+    constructor() { this.arr = []; }
+    enqueue(x) { this.arr.push(x); }
+    dequeue() { this.arr.shift(); }
+    mostrar() { console.log(this.arr); }
 }
+
+let c = new Cola();
+c.enqueue(1);
+c.enqueue(2);
+c.enqueue(3);
+c.mostrar();
+c.dequeue();
+c.mostrar();
