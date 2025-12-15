@@ -1,0 +1,7 @@
+class Cola {
+    constructor() {
+        this.items = [];
+    }
+    enqueue(x) { this.items.push(x); }
+    dequeue() { this.items.shift(); }
+}
