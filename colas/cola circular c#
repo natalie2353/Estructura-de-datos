@@ -1,3 +1,5 @@
+using System;
+
 class ColaCircular {
     int[] arr = new int[5];
     int front = -1, rear = -1;
@@ -7,5 +9,26 @@ class ColaCircular {
         if (front == -1) front = 0;
         rear = (rear + 1) % 5;
         arr[rear] = x;
+    }
+
+    public void Mostrar() {
+        if (front == -1) return;
+        int i = front;
+        while (true) {
+            Console.Write(arr[i] + " ");
+            if (i == rear) break;
+            i = (i + 1) % 5;
+        }
+        Console.WriteLine();
+    }
+}
+
+class Program {
+    static void Main() {
+        ColaCircular c = new ColaCircular();
+        c.Enqueue(10);
+        c.Enqueue(20);
+        c.Enqueue(30);
+        c.Mostrar();
     }
 }
