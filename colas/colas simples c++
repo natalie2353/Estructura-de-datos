@@ -5,7 +5,6 @@ using namespace std;
 
 class Cola {
     int arr[MAX], front, rear;
-
 public:
     Cola() { front = rear = -1; }
 
@@ -26,3 +25,14 @@ public:
         cout << endl;
     }
 };
+
+int main() {
+    Cola c;
+    c.enqueue(10);
+    c.enqueue(20);
+    c.enqueue(30);
+    c.mostrar();
+    c.dequeue();
+    c.mostrar();
+    return 0;
+}
