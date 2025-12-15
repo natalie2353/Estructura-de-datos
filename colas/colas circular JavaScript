@@ -5,4 +5,26 @@ class ColaCircular {
         this.rear = -1;
         this.size = size;
     }
+
+    enqueue(x) {
+        if ((this.rear + 1) % this.size === this.front) return;
+        if (this.front === -1) this.front = 0;
+        this.rear = (this.rear + 1) % this.size;
+        this.arr[this.rear] = x;
+    }
+
+    mostrar() {
+        let i = this.front;
+        while (true) {
+            console.log(this.arr[i]);
+            if (i === this.rear) break;
+            i = (i + 1) % this.size;
+        }
+    }
 }
+
+let c = new ColaCircular(5);
+c.enqueue(10);
+c.enqueue(20);
+c.enqueue(30);
+c.mostrar();
