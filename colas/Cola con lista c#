@@ -1,0 +1,15 @@
+using System;
+using System.Collections.Generic;
+
+class Program {
+    static void Main() {
+        Queue<int> cola = new Queue<int>();
+        cola.Enqueue(1);
+        cola.Enqueue(2);
+        cola.Enqueue(3);
+        cola.Dequeue();
+
+        foreach (int x in cola)
+            Console.Write(x + " ");
+    }
+}
