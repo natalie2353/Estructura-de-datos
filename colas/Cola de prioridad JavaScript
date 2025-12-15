@@ -1,0 +1,6 @@
+let pq = [];
+pq.push(3,1,2);
+pq.sort((a,b)=>a-b);
+
+while (pq.length)
+    console.log(pq.shift());
