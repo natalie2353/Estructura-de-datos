@@ -1,7 +1,10 @@
+#include <iostream>
+using namespace std;
+
 #define MAX 5
+
 class ColaCircular {
     int arr[MAX], front, rear;
-
 public:
     ColaCircular() { front = rear = -1; }
 
@@ -17,4 +20,25 @@ public:
         if (front == rear) front = rear = -1;
         else front = (front + 1) % MAX;
     }
+
+    void mostrar() {
+        if (front == -1) return;
+        int i = front;
+        while (true) {
+            cout << arr[i] << " ";
+            if (i == rear) break;
+            i = (i + 1) % MAX;
+        }
+        cout << endl;
+    }
 };
+
+int main() {
+    ColaCircular c;
+    c.enqueue(1);
+    c.enqueue(2);
+    c.enqueue(3);
+    c.mostrar();
+    c.dequeue();
+    c.mostrar();
+}
