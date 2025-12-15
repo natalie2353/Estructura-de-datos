@@ -1,0 +1,6 @@
+let cola = [];
+cola.push(1);
+cola.push(2);
+cola.push(3);
+cola.shift();
+console.log(cola);
