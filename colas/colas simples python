@@ -1,10 +1,21 @@
 class Cola:
     def __init__(self):
-        self.items = []
+        self.arr = []
 
     def enqueue(self, x):
-        self.items.append(x)
+        self.arr.append(x)
 
     def dequeue(self):
-        if self.items:
-            self.items.pop(0)
+        if self.arr:
+            self.arr.pop(0)
+
+    def mostrar(self):
+        print(self.arr)
+
+c = Cola()
+c.enqueue(1)
+c.enqueue(2)
+c.enqueue(3)
+c.mostrar()
+c.dequeue()
+c.mostrar()
