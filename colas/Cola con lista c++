@@ -1,0 +1,15 @@
+#include <iostream>
+#include <list>
+using namespace std;
+
+int main() {
+    list<int> cola;
+    cola.push_back(10);
+    cola.push_back(20);
+    cola.push_back(30);
+
+    cola.pop_front();
+
+    for (int x : cola)
+        cout << x << " ";
+}
