@@ -1,0 +1,28 @@
+#include <iostream>
+using namespace std;
+
+#define MAX 5
+
+class Cola {
+    int arr[MAX], front, rear;
+
+public:
+    Cola() { front = rear = -1; }
+
+    void enqueue(int x) {
+        if (rear == MAX - 1) return;
+        if (front == -1) front = 0;
+        arr[++rear] = x;
+    }
+
+    void dequeue() {
+        if (front == -1 || front > rear) return;
+        front++;
+    }
+
+    void mostrar() {
+        for (int i = front; i <= rear; i++)
+            cout << arr[i] << " ";
+        cout << endl;
+    }
+};
