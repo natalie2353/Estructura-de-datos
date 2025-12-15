@@ -1,0 +1,8 @@
+class ColaCircular {
+    constructor(size) {
+        this.arr = new Array(size);
+        this.front = -1;
+        this.rear = -1;
+        this.size = size;
+    }
+}
